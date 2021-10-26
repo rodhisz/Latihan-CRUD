@@ -88,9 +88,24 @@ class LaptopController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $laptop = laptop::find($id);
-        $laptop -> update($request->all());
-        return redirect()->route('laptop.index');
+        if(empty($request->file('image'))){
+            $laptop = laptop::findOrFail($id);
+            $laptop -> update([
+                'name' => $request->name,
+                'price' => $request->price
+            ]);
+            return redirect()->route('laptop.index') ->with('success', 'Data berhasil diedit');
+        }
+        else{
+            $laptop = laptop::findOrFail($id);
+            Storage::delete($laptop->image);
+            $laptop -> update([
+                'name' => $request->name,
+                'price' => $request->price,
+                'image'=>$request->file('image')->store('laptop-image')
+            ]);
+            return redirect()->route('laptop.index') ->with('success', 'Data berhasil diedit');
+        }
     }
 
     /**
